@@ -4,7 +4,7 @@
 1.	Image Restoration and Inverse Problems in Image Processing
 2.	More Image Restoration and Image Inpainting
 3.	Image Segmentation
-4.  Image painting and Inpainting
+4.  More Image Segmentation
 5.	Image Feature Extraction and its Applications: Image Registration
 6.	More Applications of Image Feature Extraction
 7.	Image Classification
