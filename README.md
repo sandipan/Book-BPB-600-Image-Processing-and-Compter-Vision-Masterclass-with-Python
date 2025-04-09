@@ -6,7 +6,7 @@
 3.	Image Segmentation
 4.  Image painting and Inpainting
 5.	Image Feature Extraction and its Applications: Image Registration
-6.	Applications of Image Feature Extraction
+6.	More Applications of Image Feature Extraction
 7.	Image Classification
 8.	Object Detection and Recognition
 9.	Applications of Image Processing and Computer Vision in Medical Imaging
