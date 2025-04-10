@@ -1,0 +1,79 @@
+1
+00:00:00,000 --> 00:00:01,000
+Composite video subtitle 1
+
+2
+00:00:01,000 --> 00:00:02,000
+Composite video subtitle 2
+
+3
+00:00:02,000 --> 00:00:03,000
+Composite video subtitle 3
+
+4
+00:00:03,000 --> 00:00:04,000
+Composite video subtitle 4
+
+5
+00:00:04,000 --> 00:00:05,000
+Composite video subtitle 5
+
+6
+00:00:05,000 --> 00:00:06,000
+Composite video subtitle 6
+
+7
+00:00:06,000 --> 00:00:07,000
+Composite video subtitle 7
+
+8
+00:00:07,000 --> 00:00:08,000
+Composite video subtitle 8
+
+9
+00:00:08,000 --> 00:00:09,000
+Composite video subtitle 9
+
+10
+00:00:09,000 --> 00:00:10,000
+Composite video subtitle 10
+
+11
+00:00:10,000 --> 00:00:11,000
+Composite video subtitle 11
+
+12
+00:00:11,000 --> 00:00:12,000
+Composite video subtitle 12
+
+13
+00:00:12,000 --> 00:00:13,000
+Composite video subtitle 13
+
+14
+00:00:13,000 --> 00:00:14,000
+Composite video subtitle 14
+
+15
+00:00:14,000 --> 00:00:15,000
+Composite video subtitle 15
+
+16
+00:00:15,000 --> 00:00:16,000
+Composite video subtitle 16
+
+17
+00:00:16,000 --> 00:00:17,000
+Composite video subtitle 17
+
+18
+00:00:17,000 --> 00:00:18,000
+Composite video subtitle 18
+
+19
+00:00:18,000 --> 00:00:19,000
+Composite video subtitle 19
+
+20
+00:00:19,000 --> 00:00:20,000
+Composite video subtitle 20
