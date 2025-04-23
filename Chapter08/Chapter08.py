@@ -6,16 +6,92 @@
 # ## Problems
 # 
 # 1.  **Object Detection** with pretrained deep learning Models  
-#     1.1 with **MobileNet** (`caffe` model) using `opencv-python`      
-#     1.2 With **Yolo v3** using `gluoncv` and `mxnet`      
+#     1.1 with **Faster R-CNN** using `pytorch` and `torchvision` model     
+#     1.2 with **MobileNet** (`caffe` model) using `opencv-python`      
+#     1.3 With **Yolo v3** using `gluoncv` and `mxnet`      
+#     1.4 With **YOLO v8** using `ultralytics`
 # 2.  **Custom Object Detection** with **Transfer learning** using **Yolo-V4**
 # 3.  Selective Coloring with **Mask R-CNN**
 # 4.  **Face Verification** with **DeepFace**
 # 5.  **Barcode** and **QR code detection**
 
-# ### Problem 1: Object Detection with pretrained deep learning Modelsision tasks. `torchvision` packages.
+# ### Problem 1: Object Detection with pretrained deep learning Models
+# 
+# #### 1.1: with **Faster R-CNN** using model `pytorch` and `torchvision`
 
-# ### 1.1: with MobileNet (`caffe` model) using `opencv-python`
+# In[18]:
+
+
+import torch
+import torchvision
+from torchvision.transforms import functional as F
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import random
+import warnings
+warnings.filterwarnings('ignore')
+
+# COCO class labels (91 classes including background; model uses 1-indexed labels)
+COCO_INSTANCE_CATEGORY_NAMES =[
+    '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+    'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A', 'stop sign',
+    'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+    'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack', 'umbrella', 'N/A', 'N/A',
+    'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball',
+    'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket',
+    'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
+    'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza',
+    'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A', 'dining table',
+    'N/A', 'N/A', 'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+    'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A', 'book',
+    'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+]
+
+# Load the pre-trained Faster R-CNN model
+model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+model.eval()
+
+# Load and preprocess an image
+image_path = 'images/street2.jpeg'  # Replace with your image path
+image = Image.open(image_path).convert("RGB")
+image_tensor = F.to_tensor(image)
+
+# Perform object detection
+with torch.no_grad():
+    predictions = model([image_tensor])
+
+# Visualize results
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12,12))
+ax1.imshow(image), ax1.axis('off')
+ax2.imshow(image)
+
+# Color dictionary for consistent colors per class
+color_map = {}
+
+threshold = 0.8
+for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
+    if score >= threshold:
+        label_id = label.item()  # No -1 subtraction here
+        class_name = COCO_INSTANCE_CATEGORY_NAMES[label_id]
+
+        if class_name not in color_map:
+            color_map[class_name] = (random.random(), random.random(), random.random())
+        color = color_map[class_name]
+
+        x1, y1, x2, y2 = box
+        rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1,
+                                 linewidth=2, edgecolor=color, facecolor='none')
+        ax2.add_patch(rect)
+        ax2.text(x1, y1, f'{class_name}: {score:.2f}', color='white',
+                bbox=dict(facecolor=color, edgecolor=color, boxstyle='round,pad=0.2'))
+
+ax2.axis('off')
+plt.tight_layout()
+plt.show()
+
+
+# ### 1.2: with MobileNet (`caffe` model) using `opencv-python`
 
 # In[ ]:
 
@@ -24,7 +100,6 @@
 from imutils.video import VideoStream
 from imutils.video import FPS
 import numpy as np
-import argparse
 import imutils
 import time
 import cv2
@@ -109,7 +184,7 @@ plt.axis('off')
 plt.show()
 
 
-# ### 1.2: With Yolo v3 using `gluoncv` and `mxnet`mage tensor `x` through the YOLO v3
+# ### 1.3: With Yolo v3 using `gluoncv` and `mxnet`mage tensor `x` through the YOLO v3
 # 
 
 # In[3]:
@@ -145,6 +220,42 @@ utils.viz.plot_bbox(img, bounding_boxs[0], scores[0], class_IDs[0], class_names=
 plt.axis('off')
 plt.show()
 
+
+# ### 1.4: Object detection with YOLOv8 with Ultralytics
+
+# In[1]:
+
+
+import torch
+print(torch.cuda.is_available())
+# True
+
+from ultralytics import YOLO
+# Load model
+model = YOLO("yolov8n.pt")
+
+# Train the model
+train_results = model.train(
+    data="coco8.yaml",  # path to dataset YAML
+    epochs=100,  # number of training epochs
+    imgsz=640,  # training image size
+    device=0 if torch.cuda.is_available() else "cpu",  # device to run on, 
+                            # i.e. device=0 or device=0,1,2,3 or device=cpu
+)
+
+
+# In[2]:
+
+
+# Evaluate model performance on the validation set
+metrics = model.val()
+
+# Perform object detection on an image
+results = model("images/Img_05_08.jpg")
+results[0].show()
+
+
+# ![](images/yolov8_ultra_out.png)
 
 # ### Problem 2: Custom Object Detection with Transfer learning using Yolo-V4
 
