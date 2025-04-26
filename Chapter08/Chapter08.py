@@ -223,7 +223,7 @@ plt.show()
 
 # ### 1.4: Object detection with YOLOv8 with Ultralytics
 
-# In[1]:
+# In[ ]:
 
 
 import torch
@@ -374,6 +374,8 @@ train_file = open("build/darknet/x64/data/train.txt", "w")
 valid_file = open("build/darknet/x64/data/valid.txt", "w")
 listOfFiles = os.listdir('build/darknet/x64/data/obj/')  
 pattern = "*.jpg"  
+
+np.random.seed(24) # for reproducibility
 for f_name in listOfFiles:  
   if fnmatch.fnmatch(f_name, pattern):
     if np.random.rand(1) < 0.8:
@@ -827,13 +829,14 @@ verify_face(dataset, 0.66)
 
 # ## Problem 5: Barcode Detection
 
-# In[2]:
+# In[14]:
 
 
 #! pip install python-Levenshtein
 #! pip install python-barcode
 #! pip install qrcode
 #! pip install pyzbar
+#! pip install opencv-python==4.5.3.56
 from PIL import ImageFont, ImageDraw, Image  
 from pyzbar import pyzbar
 import cv2
@@ -842,9 +845,11 @@ import barcode
 import qrcode
 from barcode.writer import ImageWriter
 import matplotlib.pylab as plt
+import warnings
+warnings.filterwarnings('ignore')
 
 
-# In[8]:
+# In[15]:
 
 
 bar1 = barcode.get('ean13', str('123456789012'), writer=ImageWriter())
@@ -859,20 +864,20 @@ qr = qrcode.QRCode(
 )
 qr.add_data(u'বই: Image Processing MasterClass (BPB)')
 qr.make(fit=True)
-bar2 = qr.make_image(fill_color="black", back_color="white")
-bar2.save('images/bar2.png')
+qr1 = qr.make_image(fill_color="black", back_color="white")
+qr1.save('images/qr1.png')
 
 im_orig = Image.open('images/book_cover.png')
 #print(im_orig.size)
 im = im_orig.copy()
 bar1 = Image.open('images/bar1.png')
-bar2 = Image.open('images/bar2.png')
+qr1 = Image.open('images/qr1.png')
 im.paste(bar1.resize((262,140)).rotate(10), (550,10,812,150))
-im.paste(bar2.resize((100,100)).rotate(-10), (400,860,500,960))
+im.paste(qr1.resize((100,100)).rotate(-10), (400,860,500,960))
 im.save('images/book_cover_barcode.png')
 
 
-# In[43]:
+# In[16]:
 
 
 # load the input image
@@ -914,7 +919,7 @@ im_out = cv2.cvtColor(np.array(pil_im), cv2.COLOR_RGB2BGR)
 cv2.imwrite('images/book_cover_barcode_detected.png', im_out)    
 
 
-# In[44]:
+# In[17]:
 
 
 plt.figure(figsize=(20,10))
