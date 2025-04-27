@@ -29,7 +29,7 @@
 
 # ## Problem 1: Inverse Problems in Image Processing
 
-# In[21]:
+# In[2]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
@@ -88,7 +88,7 @@ plt.tight_layout()
 plt.show()
 
 
-# ### Problem 2: Denoising with Weighted Median Filtering
+# ## Problem 2: Denoising with Weighted Median Filtering
 
 # In[27]:
 
@@ -143,7 +143,7 @@ plt.show()
 
 # ![](images/denoised_WMF.png)
 
-# ### Problem 3: Non-blind Deconvolution for Image Restoration
+# ## Problem 3: Non-blind Deconvolution for Image Restoration
 # 
 # **Deconvolution** is the operation which is inverse to **convolution**, it is a computationally intensive image processing technique for image restoration. In general, the objective of deconvolution is to find an (approximate) solution for $f$ from a convolution equation of the form: $g = f \circledast h + \epsilon$, given $g$ and the convolution *kernel* $h$. In this section, we shall discuss on a few deconvolution algorithms with the assumption that the deconvolution is **non-blind**, i.e., the *point-spread function* (*PSF*) or the *kernel* $h(.)$ is **known**.
 
@@ -376,11 +376,11 @@ res_blur = deconvolve(img_blur, kern_blur)
 
 # ### 3.4: Deconvolution with (Unsupervised) Weiner Filter with scikit-image
 
-# In[ ]:
+# In[11]:
 
 
 from skimage import color, restoration
-from scipy.signal import convolve2d as conv2
+from scipy.signal import convolve2d
 
 
 # In[ ]:
@@ -389,7 +389,7 @@ from scipy.signal import convolve2d as conv2
 im = rgb2gray(imread('images/Img_01_01.jpg'))
 noisy = im.copy()
 psf = np.ones((5, 5)) / 25
-noisy = conv2(noisy, psf, 'same')
+noisy = convolve2d(noisy, psf, 'same')
 noisy += 0.1 * im.std() * np.random.standard_normal(im.shape)
 
 
@@ -404,25 +404,15 @@ deconvolved = scipy.signal.wiener(noisy, (5,5))
 
 # ### 3.5: Non-Blind Deconvolution with Richardson-Lucy algorithm 
 # 
-# The *Richardson–Lucy* algorithm, also known as Lucy–Richardson deconvolution [9], is an iterative procedure for recovering an underlying image that has been blurred by a **known** point spread function. It's an iterative **Bayesian** algorithm for *image restoration*. The iterative updation step of the algorithm is shown in the following figure:
-# 
 # ![](images/Img_01_32.png)
-# 
-# 
-# Here, since the PSF $g(x)$ is known, we can find the restored $f(x)$ by iterating over the above equation until convergence. An initial guess is required for the restored $f_0(x)$ to start the algorithm. Then, in subsequent iterations, because of the form of the algorithm, large deviations in the guess from the true object are lost rapidly in initial iterations, whereas detail is added more slowly in subsequent iterations. Advantages of this algorithm include a nonnegativity constraint if the initial guess
-# $f_0(x) \geq 0$. Also, energy is conserved as the iteration proceeds.
-# 
-# In this example, we shall deconvolve an image using Richardson-Lucy deconvolution algorithm, using `skimage.restoration` module's implementation. The algorithm is based on a *PSF* which is described as the *impulse response* of the optical system. The blurred image is sharpened through a number of iterations, which needs to be hand-tuned.
-# 
-# * Read the input cameraman image, convert it to grayscale. Use a $5\times 5$ box kernel to convolve / blur the image and add random Poisson noise to the image of rate $\lambda$, using the `np.random.poisson()` function, as shown in the following code snippet.
 
-# In[ ]:
+# In[12]:
 
 
-im = color.rgb2gray(imread('images/Img_01_01.jpg'))
+im = rgb2gray(imread('images/Img_01_01.jpg'))
 im_noisy = im.copy()
 psf = np.ones((5, 5)) / 25
-im_noisy = conv2(im_noisy, psf, 'same')
+im_noisy = convolve2d(im_noisy, psf, 'same')
 im_noisy += (np.random.poisson(lam=25, size=im.shape) - 10) / 255.
 
 
@@ -436,58 +426,115 @@ deconvolved_RL = restoration.richardson_lucy(im_noisy, psf, iterations=20)
 # 
 # ![](images/rl_out.png)
 
-# ### Problem 4: Blind Deconvolution with Richardson-Lucy
+# ## Problem 4: Blind Deconvolution with Richardson-Lucy
 
-# In[ ]:
-
-
-from scipy.signal import convolve2d, fftconvolve
-from skimage import img_as_float
+# In[18]:
 
 
-# In[ ]:
+import numpy as np
+from scipy.signal import convolve2d
 
 
-def norm(im):
-    return im - im.min() / (im.max() - im.min())
-
-def richardson_lucy_blind(image, psf, original, num_iter=5):    
-    im_deconv = np.full(image.shape, 0.1, dtype='float')   #image.copy() 
-    for i in range(num_iter):
-        psf_mirror = np.flip(psf)
-        conv = fftconvolve(im_deconv, psf, mode='same')
-        relative_blur = image / (conv + 0.001)
-        im_deconv *= fftconvolve(relative_blur, psf_mirror, mode='same')
-        im_deconv_mirror = np.flip(im_deconv)
-        psf *= fftconvolve(relative_blur, im_deconv_mirror, mode='same')
-        # plot the original and restored images along with the estimated blur PSF here
-    return norm(im_deconv), psf
+# In[16]:
 
 
-# In[ ]:
+def richardson_lucy_blind(b, f_init, g_init, n_psf_updates=10, n_image_updates=10):
+    """
+    Blind Richardson-Lucy deconvolution (corrected version).
+
+    Parameters:
+        b : 2D np.ndarray
+            Blurred and noisy input image.
+        f_init : 2D np.ndarray
+            Initial guess for the true image.
+        g_init : 2D np.ndarray
+            Initial guess for the PSF (must be normalized).
+        n_psf_updates : int
+            Number of outer iterations (PSF updates).
+        n_image_updates : int
+            Number of inner iterations (image updates).
+    
+    Returns:
+        f : 2D np.ndarray
+            Restored image.
+        g : 2D np.ndarray
+            Estimated PSF.
+    """
+    f = f_init.copy()
+    g = g_init.copy()
+    
+    eps = 1e-7  # Small constant to prevent division by zero
+
+    for i in range(n_psf_updates):
+        # --- Fix PSF and update image ---
+        for k in range(n_image_updates):
+            conv_fg = convolve2d(f, g, mode='same', boundary='wrap')
+            relative_blur = b / (conv_fg + eps)
+            correction = convolve2d(relative_blur, np.flip(np.flip(g, axis=0), axis=1), mode='same', boundary='wrap')
+            f *= correction
+
+        # --- Fix image and update PSF ---
+        conv_fg = convolve2d(f, g, mode='same', boundary='wrap')
+        relative_blur = b / (conv_fg + eps)
+        g *= convolve2d(f, relative_blur, mode='valid', boundary='wrap')
+        
+        # Normalize PSF to maintain energy
+        g = np.clip(g, 0, None)  # Ensure non-negative
+        g /= np.sum(g)
+
+    return f, g
 
 
-img = img_as_float(imread('images/Img_01_09.jpg', True))
-original, k = img.copy(), 7
-psf = np.ones((k, k)) / k**2
-img = convolve2d(img, psf, 'same')
-img += 0.3 * img.std() * np.random.default_rng().standard_normal(img.shape)
+# In[37]:
 
 
-# In[ ]:
+from skimage import color, io
+from scipy.signal import gaussian
+from skimage.metrics import peak_signal_noise_ratio as psnr
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+def gaussian_kernel(size=5, sigma=1):
+    """Generates a 2D Gaussian kernel."""
+    g1d = gaussian(size, std=sigma)
+    kernel = np.outer(g1d, g1d)
+    kernel /= np.sum(kernel)  # Normalize
+    return kernel
+    
+# Load sample image
+im = io.imread('images/Img_01_09.jpg', True)
+#im = color.rgb2gray(data.astronaut())
+#im = im[30:130, 150:250]  # crop to smaller region
+
+# Simulate blur
+psf_true = gaussian_kernel(5, 5) #np.ones((5,5)) / 25
+blurred = convolve2d(im, psf_true, 'same', boundary='wrap')
+noisy = blurred + 0.25 * np.random.randn(*blurred.shape)
+
+# Initial guesses
+f_init = noisy.copy()
+g_init = np.ones((5,5)) / 25  # flat guess
+g_init = np.random.random((5, 5))
+g_init /= np.sum(g_init) 
+
+# Perform blind deconvolution
+f_restored, g_estimated = richardson_lucy_blind(noisy, f_init, g_init, n_psf_updates=10, n_image_updates=10)
+
+# Plot
+fig, axs = plt.subplots(1, 3, figsize=(12,5))
+axs[0].imshow(im, cmap='gray')
+axs[0].set_title('Original'), axs[0].axis('off')
+axs[1].imshow(noisy, cmap='gray')
+axs[1].set_title(f'Blurred + Noisy, PSNR:{psnr(im, noisy):.03f}'), axs[1].axis('off')
+axs[2].imshow(f_restored, cmap='gray')
+axs[2].set_title(f'Restored, PSNR:{psnr(im, f_restored):.03f}'), axs[2].axis('off')
+plt.suptitle('Image Restoration using Blind deconvolution with the Richardson-Lucy Algorithm', size=15)
+plt.tight_layout()
+plt.show()
 
 
-psf = np.random.random((k, k))
-psf /= np.sum(psf) 
-psf = np.pad(psf, (((M-k)//2,(M-k)//2+(1-M%2)), ((N-k)//2,(N-k)//2+(1-N%2))), mode='constant') 
-deconvolved = richardson_lucy_blind(img, psf, original, 3)  
-
-
-# * Plot the *restored* image (compute the *PSNR*) along with the estimated *PSF* for the first couple of iterations, you should obtain a figure like the one shown below:
-# 
-# ![](images/rlb_out.png)
-
-# ### Problem 5: Total Variation Denoising
+# ## Problem 5: Total Variation Denoising
 
 # ### 5.1: TV Denoising with the Rudin, Fatemi and Osher algorithm proposed by Chambolle 
 
@@ -591,7 +638,7 @@ plt.subplots_adjust(wspace=0.05, hspace=0.05, top=0.95, bottom=0, left=0, right=
 plt.show()
 
 
-# ### Problem 6: Image Denoising with Wavelets
+# ## Problem 6: Image Denoising with Wavelets
 
 # ### 6.1: Wavelet-denoising with pywt
 
@@ -676,7 +723,7 @@ for sigma in [sigma_est/2, sigma_est/3, sigma_est/4]:
 
 # ![](images/wavelet_cat_out.png)
 
-# ### Problem 7: Denoising using Non-local Means with opencv-python
+# ## Problem 7: Denoising using Non-local Means with opencv-python
 
 # In[81]:
 
@@ -698,7 +745,7 @@ for sz in [15, 21]:
 
 # ![](images/nl_out.png)
 
-# ### Problem 8: Denoising with Bilateral Filter
+# ## Problem 8: Denoising with Bilateral Filter
 
 # ### 8.1:  with SimpleITK
 
@@ -748,7 +795,7 @@ for d in [9, 15]:
 
 # ![](images/bilat_out.png)
 
-# ### Problem 9: Denoising with MAP Bayesian with an MRF Prior
+# ## Problem 9: Denoising with MAP Bayesian with an MRF Prior
 
 # In **Bayesian image denoising** the *optimal noiseless image* is defined as the image that *maximizes* the **posterior pdf**. In this problem we shall implement a *maximum a-posteriori* (**MAP**) *Bayesian denoising algorithm* that uses a noise model coupled with *MRF prior* that uses a $4$-neighborhood system (hence satisfies the **Markov property**, since a pixel is dependent only on its *immediate neighbors*). The following figure shows the theory that will be required to implement the denoising algorithm [22].
 #     
@@ -815,7 +862,7 @@ denoised = res.x.reshape(im_size)
 
 # ![](images/denoise_MAP_out.png)
 
-# ### Problem 10: Denoising Images with Kernel PCA
+# ## Problem 10: Denoising Images with Kernel PCA
 
 # *Kernel PCA* (**kPCA**) is an extension of *Principal Component Analysis* (**PCA**) - a very popular *linear* dimension reduction technique. *kPCA* uses kernels to achieve non-linearity in dimensionality reduction. 
 # 
@@ -917,6 +964,6 @@ X_reconstructed_pca = pca.inverse_transform(pca.transform(X_test_noisy))
 #   
 #     Try changing the value of the other parameters too, in roddr to observe the impact on the denoised image quality and the computational efficiency.
 # 
-# 11. **Anisotropic diffusion**: Refer to the part 1 of this book (chapter 5) to implement the classic *Perona–Malik* algorithm to restore a degraded image and compare the output obtained with the other restoration methods.
+# 11. **Anisotropic diffusion**: Refer to the book *Image Processing MasterClass with Python* (chapter 5) to implement the classic *Perona–Malik* algorithm to restore a degraded image and compare the output obtained with the other restoration methods.
 # 
 # 12. Deep Inverse problems in python: implement deep image reconstruction with the python package *DeepInPy*, as discussed in  https://www1.icsi.berkeley.edu/~stellayu/publication/doc/2020deepInPyISMRM.pdf
