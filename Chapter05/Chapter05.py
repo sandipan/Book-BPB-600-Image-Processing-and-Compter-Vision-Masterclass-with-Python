@@ -36,7 +36,7 @@ import matplotlib.pylab as plt
 # In[5]:
 
 
-orig_img = cv2.imread('images/Img_07_01.png')
+orig_img = cv2.imread('images/rcube.png')
 img = orig_img.copy()
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 gray = np.float32(gray)
@@ -110,7 +110,7 @@ plt.show()
 # In[42]:
 
 
-im1 = plt.imread('images/Img_07_07.jpg')
+im1 = plt.imread('images/tom_jerry.jpg')
 # slope of the perspective transform
 h, w, _ = im.shape
 slope = np.tan(np.radians(30))
@@ -118,14 +118,14 @@ perspective_matrix = np.linalg.inv(np.array([[1, 0, 0],
                         [-slope/3, 1, slope * h / 3],
                         [-slope/w, 0, 1 + slope/2]]))
 im2 = cv2.warpPerspective(im, perspective_matrix, (w,h))
-plt.imsave('images/Img_07_08.jpg', im2)
+plt.imsave('images/tom_jerry_persp.jpg', im2)
 
 rot = np.array([[np.cos(0.5), -np.sin(0.5), 0],[np.sin(0.5), np.cos(0.5), 0], [0,0,1]])
 tr = np.array([[1,0, 50],[0, 1, -50], [0,0,1]])
 sc = np.array([[1.1,0, 0],[0, 1.1, 0], [0,0,1]])
 affine_mat = np.linalg.inv(rot @ tr @ sc)
 im3 = cv2.warpAffine(im, affine_mat[:2,:], (w,h))
-plt.imsave('images/Img_07_09.jpg', im3)
+plt.imsave('images/tom_jerry_affine.jpg', im3)
 
 plt.figure(figsize=(15,7))
 plt.imshow(np.hstack((im1, im2, im3))), plt.axis('off')
@@ -141,10 +141,10 @@ MAX_FEATURES = 500
 GOOD_MATCH_PERCENT = 0.15
 
 # reference image
-im_ref = cv2.imread('images/Img_07_07.jpg') 
+im_ref = cv2.imread('images/tom_jerry.jpg') 
 # images to be aligned
-im1 = cv2.imread('images/Img_07_08.jpg') 
-im2 = cv2.imread('images/Img_07_09.jpg') 
+im1 = cv2.imread('images/tom_jerry_persp.jpg') 
+im2 = cv2.imread('images/tom_jerry_affine.jpg') 
 
 # Convert images to grayscale
 im_ref_g = cv2.cvtColor(im_ref, cv2.COLOR_RGB2GRAY)
@@ -221,9 +221,9 @@ from skimage.feature import (match_descriptors, ORB, plot_matches)
 from skimage.io import imread, imsave
 from skimage.color import rgb2gray
 
-im1 = imread('images/Img_07_07.jpg')
-im2 = imread('images/Img_07_08.jpg') 
-im3 = imread('images/Img_07_09.jpg') 
+im1 = imread('images/tom_jerry.jpg')
+im2 = imread('images/tom_jerry_persp.jpg') 
+im3 = imread('images/tom_jerry_affine.jpg') 
 
 im1_g, im2_g, im3_g = rgb2gray(im1), rgb2gray(im2), rgb2gray(im3)
 descriptor_extractor = ORB(n_keypoints=100)
@@ -257,8 +257,8 @@ print(cv2.__version__)
 
 from matplotlib import pyplot as plt
 
-img1 = cv2.imread('images/Img_07_05.jpg') # queryImage
-img2 = cv2.imread('images/Img_07_06.jpg') # trainImage
+img1 = cv2.imread('images/konark_big.jpg') # queryImage
+img2 = cv2.imread('images/konark_small.jpg') # trainImage
 
 img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
@@ -314,8 +314,8 @@ print(device)
 # In[ ]:
 
 
-img1 = K.io.load_image("images/Img_07_07.jpg", K.io.ImageLoadType.RGB32, device=device)[None, ...]
-img2 = K.io.load_image("images/Img_07_09.jpg", K.io.ImageLoadType.RGB32, device=device)[None, ...]
+img1 = K.io.load_image("images/tom_jerry.jpg", K.io.ImageLoadType.RGB32, device=device)[None, ...]
+img2 = K.io.load_image("images/tom_jerry_affine.jpg", K.io.ImageLoadType.RGB32, device=device)[None, ...]
 
 disk = KF.DISK.from_pretrained("depth").to(device)
 

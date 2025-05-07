@@ -71,11 +71,7 @@ def plot_images(ims, titles, suptitle = None):
     plt.show()
 
 
-# * Now, let's first  read the image `coins.png`.
-# * use image gray level histogram to identify the range of grey levels within the coins.
-# * as can be seen from the following figure, most pixels are between $100$ and $240$.
-
-# In[ ]:
+# In[3]:
 
 
 im = rgb2gray(imread('images/coins.png'))
@@ -88,7 +84,7 @@ plt.title('hisogram of gray levels', size=20)
 plt.show()
 
 
-# In[74]:
+# In[5]:
 
 
 min_pixel, max_pixel = 90, 255
@@ -105,13 +101,13 @@ plot_images([im, im_sliced_without_bg, im_sliced_with_bg],
 
 # ### 1.2 Using gray-level slicing to Increase contrast within ROI 
 
-# In[49]:
+# In[15]:
 
 
 def enhance_image(im, im_mask, min_pixel):
     im_enhanced = 0 * im
-    im_enhanced[im_mask] = np.round((im[im_mask] - min_pixel) * 1.8) # could be any transform
-    im_enhanced[~im_mask] = 225 # could be any value or another transform
+    im_enhanced[im_mask] = np.clip(np.round((im[im_mask] - min_pixel) ** 1.125), 0, 255) # could be any transform
+    im_enhanced[~im_mask] = 25 # could be any value or another transform
     return im_enhanced
     
 im_enhanced = enhance_image(im, im_mask, min_pixel)
@@ -122,7 +118,7 @@ plot_images([im, im_sliced_without_bg, im_enhanced],
 # In[8]:
 
 
-im = (255*rgb2gray(imread('images/Img_03_01.jpg'))).astype(np.uint8)
+im = (255*rgb2gray(imread('images/pattern.jpg'))).astype(np.uint8)
 h, w = im.shape
 bitplanes = np.unpackbits([im.flatten()], axis=0)
 #bitplanes.shape
@@ -158,7 +154,7 @@ from skimage.filters import try_all_threshold, threshold_otsu, rank
 # In[ ]:
 
 
-img = rgb2gray(imread('images/Img_03_02.jpg'))
+img = rgb2gray(imread('images/tagore.jpg'))
 img = (255* img / img.max()).astype(np.uint8)
 
 # Here, we specify a radius for local thresholding algorithms.
@@ -213,7 +209,7 @@ plt.show()
 
 import SimpleITK as sitk
 
-input_image = sitk.ReadImage('images/Img_03_02.jpg', sitk.sitkFloat32)
+input_image = sitk.ReadImage('images/tagore.jpg', sitk.sitkFloat32)
 rescale = sitk.RescaleIntensityImageFilter()
 rescale.SetOutputMaximum(1.0)
 input_image = rescale.Execute(input_image)
@@ -241,7 +237,7 @@ import cv2
 import numpy as np
 import matplotlib.pylab as plt
 
-im = cv2.imread('images/Img_03_02.jpg', 0) 
+im = cv2.imread('images/tagore.jpg', 0) 
 #im = cv2.GaussianBlur(im, (7, 7), 0)
 thresh1 = cv2.adaptiveThreshold(im, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 21, 10)
 thresh2 = cv2.adaptiveThreshold(im, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 21, 4)
@@ -305,7 +301,7 @@ cluster_sample_locs = [
                          ((127, 70), (143, 60), (0,0))
                       ]
 
-im = imread('images/Img_03_15.png')
+im = imread('images/pepper.png')
 mask = cluster_rgb_mahalanobis(im, cluster_sample_locs)
 
 plt.figure(figsize=(9,4)) 
@@ -339,7 +335,7 @@ warnings.filterwarnings('ignore')
 # In[13]:
 
 
-im = imread('images/Img_03_22.png')[...,:3]
+im = imread('images/horses.png')[...,:3]
 
 X = np.reshape(im, (-1, im.shape[-1]))
 X_sample = shuffle(X, random_state=0)[:1000]
@@ -396,7 +392,7 @@ import cv2
 import numpy as np
 import matplotlib.pylab as plt
 
-image = cv2.imread('images/Img_03_03.jpg')
+image = cv2.imread('images/coins.jpg')
 original = np.copy(image)
 shifted = cv2.pyrMeanShiftFiltering(image, 20, 50)
 
@@ -437,7 +433,7 @@ import matplotlib.pyplot as plt
 from skimage.io import imread
 from skimage.color import rgb2lab, label2rgb
 
-image = imread('images/Img_03_04.jpg') #pepper
+image = imread('images/flowers.jpg') #pepper
 flattened_image = np.reshape(rgb2lab(image), [-1, 3])
  
 # estimate bandwidth
@@ -521,7 +517,7 @@ def run_watershed(image):
     return dist_transform, markers, image
                 
 # Load the image
-image = cv2.imread('images/Img_03_03.jpg')
+image = cv2.imread('images/coins.jpg')
 original = image.copy()
 dist_transform, markers, image = run_watershed(image)
 
@@ -547,7 +543,7 @@ import SimpleITK as sitk
 import numpy as np
 import matplotlib.pylab as plt
 
-img = sitk.ReadImage('images/Img_03_05.jpg', sitk.sitkFloat64)
+img = sitk.ReadImage('images/whale.jpg', sitk.sitkFloat64)
 rescale = sitk.RescaleIntensityImageFilter()
 rescale.SetOutputMaximum(1.0)
 img = rescale.Execute(img)
@@ -594,7 +590,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 
-orig = cv2.imread('images/Img_03_06.png')
+orig = cv2.imread('images/gerbara.png')
 img = np.copy(orig)
 mask = np.zeros(img.shape[:2],np.uint8)
 
@@ -630,8 +626,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 # In[74]:
 
 
-img = imread('images/Img_03_07.png')[...,:3]
-mask = imread('images/Img_mask_03_07.png')
+img = imread('images/horse.png')[...,:3]
+mask = imread('images/mask_horse.png')
 markers = np.zeros(img.shape[:2], dtype=np.uint8)
 markers[(mask[...,0] >= 200)&(mask[...,1] <= 20)&(mask[...,2] <= 20)] = 1
 markers[(mask[...,0] <= 20)&(mask[...,1] >= 200)&(mask[...,2] <= 20)] = 2
@@ -688,7 +684,7 @@ def plot_image(img, title, img_type=np.float32):
     plt.imshow(im), plt.axis('off'), plt.title(title, size=20)
 
 
-input_image = sitk.ReadImage('images/Img_03_09.png', sitk.sitkFloat32)
+input_image = sitk.ReadImage('images/cameraman.png', sitk.sitkFloat32)
 
 smoothing = sitk.CurvatureAnisotropicDiffusionImageFilter()
 smoothing.SetTimeStep(0.125)
@@ -751,7 +747,7 @@ from skimage import graph, segmentation, color
 from skimage.io import imread
 from matplotlib import pyplot as plt
 
-img = imread('images/Img_03_10.png')[...,:3]
+img = imread('images/apples_oranges.png')[...,:3]
 
 labels_slic = segmentation.slic(img, compactness=30, n_segments=400)
 out_slic = color.label2rgb(labels_slic, img, kind='avg')
@@ -776,7 +772,7 @@ plt.show()
 # In[5]:
 
 
-img = io.imread('images/Img_03_11.png')[...,:3]
+img = io.imread('images/bird.png')[...,:3]
 
 labels_slic = segmentation.slic(img, compactness=30, n_segments=400)
 out_slic = color.label2rgb(labels_slic, img, kind='avg')

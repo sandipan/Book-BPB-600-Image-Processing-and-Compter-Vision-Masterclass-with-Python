@@ -294,16 +294,16 @@ x_test_p = rednet30.predict(x_test_noisy)
 
 
 # <div>
-# <img src="images/Img_02_01.png" width="1000"/>
+# <img src="images/noisy_cifar10.png" width="1000"/>
 # </div>
 # <div>
-# <img src="images/Img_02_02.png" width="1000"/>
+# <img src="images/denoised_rednet.png" width="1000"/>
 # </div>
 
 # ### 1.3: Deraining with Gated Context Agreegation Network (GCANet)
 # 
 # In this problem we shall focus on *deraining* an image using a *pre-trained* deep learning model (*dehazing* network), i.e. the input will be an image in a *rainy* environment and the output will be one without the *rain-streak* component. Given a hazy input image, the *dehazing* network tries to retrieve the uncorrupted content. Again, instead of using traditional handcrafted or low-level *image priors* as the *constraints* for *handcrafted*, the output *haze-free* image will be directly restored using an *end-to-end* deep neural net named *gated context aggregation network* (**GCANet**). In this network, the latest *smoothed dilation technique* is used to get rid of the *gridding artifacts* caused due to the *dilated convolution*, and a *gated sub-network* will be used to fuse the features from different levels. The following figure shows the architecture of the deep neural net [3].
-# ![](images/Img_02_04.png)
+# ![](images/gcanet_arch.png)
 # 
 # * Using the *encoder*, a *hazy* input image is encoded into the feature maps. Next more context information is aggregated and  features from different levels are fused (without downsampling) to enhance the feature maps. 
 # * *Smoothed dilated convolution* (implemented using *dilated convolutional layer*) and an extra *gated sub-network* are used. 
@@ -455,7 +455,7 @@ net.float()
 net.load_state_dict(torch.load(model, map_location='cpu'))
 net.eval()
 
-img_path = 'images/Img_02_03.jpg'
+img_path = 'images/bridge.jpg'
 img = Image.open(img_path).convert('RGB')
 im_w, im_h = img.size
 if im_w % 4 != 0 or im_h % 4 != 0:
@@ -665,7 +665,7 @@ def deblur(blurred, model_path):
     generated = np.array([deprocess_image(img) for img in generated_images])[0]
     return generated
 
-orig, blurred = load_image('images/Img_02_04.jpg'), load_image('images/Img_02_21.jpg')
+blurred = load_image('images/parrot_blur.jpg') # 'traffic_blur.jpg'
 deblurred = deblur(blurred, 'models/generator.h5')
 
 
@@ -782,7 +782,7 @@ def show_recovered_image(im_orig, im_rec, algo_name):
 
 from sklearn.neighbors import KNeighborsRegressor
 
-image_orig = cv2.imread('images/Img_02_05.jpg', 0) 
+image_orig = cv2.imread('images/lena.jpg', 0) 
 mask = cv2.imread('images/mask.jpg', 0)
 mask = mask / mask.max()
 thres = 0.5
@@ -894,7 +894,7 @@ def edges_with_anisotropic_diffusion(img, niter=100, kappa=50, gamma=0.2):
     output[output < 0] = 0
     return output
 
-im = rgb2gray(rgba2rgb(imread('images/Img_02_09.png')))
+im = rgb2gray(rgba2rgb(imread('images/umbc.png')))
 output_aniso = sketch(im, edges_with_anisotropic_diffusion(im))
 
 
@@ -936,7 +936,7 @@ def get_data(img):
     y_data = np.array(y_data)
     return x_data, y_data
 
-im = Image.open("images/Img_02_08.jpg")
+im = Image.open("images/me.jpg")
 x, y = get_data(im)
 
 

@@ -27,6 +27,21 @@
 # 9. Denoising with **MAP Bayesian** with an **MRF Prior**
 # 10. Denoising Images with **Kernel PCA**
 
+# In[ ]:
+
+
+def resize_preserve_aspect_ratio(im, target_width, resample=Image.BILINEAR):
+    """
+    Resize an image to a given width while preserving the aspect ratio.
+    """
+    aspect_ratio = im.height / im.width
+    target_height = int(target_width * aspect_ratio)
+    return im.resize((target_width, target_height), resample)
+
+# Usage:
+im_resized = resize_preserve_aspect_ratio(im, target_width=300)
+
+
 # ## Problem 1: Inverse Problems in Image Processing
 
 # In[2]:
@@ -58,7 +73,7 @@ def degrade(f, sigma, theta):
     return g
     
 sigma, theta = 0.15, 0.075
-im = rgb2gray(imread('images/Img_01_17.jpg'))
+im = rgb2gray(imread('images/beans.jpg'))
 f_true = im
 g = degrade(f_true, sigma, theta)
 
@@ -121,7 +136,7 @@ def weighted_median(im, mask):
 # In[22]:
 
 
-im = cv2.imread('images/Img_01_00.jpg', 0)
+im = cv2.imread('images/ic.jpg', 0)
 im = im / im.max()
 noisy_im = random_noise(im, mode='s&p')
 weight_mask = np.ones((5,5))
@@ -219,7 +234,7 @@ def plot_freq_spec_3d(freq):
 # In[29]:
 
 
-im = rgb2gray(imread('images/Img_01_13.jpg')) 
+im = rgb2gray(imread('images/house.jpg')) 
 (M, N), k, sigma2, nsigma2 = im.shape, 15, 0.125, 0.0025
 kernel = np.outer(signal.windows.gaussian(k, sigma2), signal.windows.gaussian(k, sigma2))
 im_blur = convolve2d(im, kernel, k) #, mode='same')
@@ -241,7 +256,7 @@ im_res_pseudo, F_pseudo = pseudo_inverse_filter(im_cor, kernel, epsilon)
 # In[ ]:
 
 
-im = rgb2gray(imread('images/Img_01_05.jpg')) 
+im = rgb2gray(imread('images/car.jpg')) 
 (M, N), k = im.shape, 21 # a 21 x 21 motion blurred kernel
 kernel = np.zeros((k, k))
 kernel[int((k-1)/2), :] = np.ones(k)
@@ -289,8 +304,8 @@ def apply_bokeh_blur(img, mask):
 # In[ ]:
 
 
-mask = rgb2gray(rgba2rgb(imread('images/Img_01_12.png')))
-img = cv2.resize(imread('images/Img_01_13.png') / 255, mask.shape[::-1])
+mask = rgb2gray(rgba2rgb(imread('images/xmask.png')))
+img = cv2.resize(imread('images/xtree.png') / 255, mask.shape[::-1])
 out = apply_bokeh_blur(img, mask)
 
 
@@ -346,7 +361,7 @@ def deconvolve(img, kern):
 # In[ ]:
 
 
-img = cv2.imread('images/Img_01_03.jpg', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('images/barbara.jpg', cv2.IMREAD_GRAYSCALE)
 img = np.float32(img) / 255
 img = blur_edge(img)
 angle, d, snr = np.deg2rad(135), 22, 25
@@ -386,7 +401,7 @@ from scipy.signal import convolve2d
 # In[ ]:
 
 
-im = rgb2gray(imread('images/Img_01_01.jpg'))
+im = rgb2gray(imread('images/cameraman.jpg'))
 noisy = im.copy()
 psf = np.ones((5, 5)) / 25
 noisy = convolve2d(noisy, psf, 'same')
@@ -404,12 +419,12 @@ deconvolved = scipy.signal.wiener(noisy, (5,5))
 
 # ### 3.5: Non-Blind Deconvolution with Richardson-Lucy algorithm 
 # 
-# ![](images/Img_01_32.png)
+# ![](images/rl_deconv.png)
 
 # In[12]:
 
 
-im = rgb2gray(imread('images/Img_01_01.jpg'))
+im = rgb2gray(imread('images/cameraman.jpg'))
 im_noisy = im.copy()
 psf = np.ones((5, 5)) / 25
 im_noisy = convolve2d(im_noisy, psf, 'same')
@@ -503,7 +518,7 @@ def gaussian_kernel(size=5, sigma=1):
     return kernel
     
 # Load sample image
-im = io.imread('images/Img_01_09.jpg', True)
+im = io.imread('images/lena.jpg', True)
 #im = color.rgb2gray(data.astronaut())
 #im = im[30:130, 150:250]  # crop to smaller region
 
@@ -541,34 +556,26 @@ plt.show()
 # Total variation (TV) regularization is a technique that was originally developed for *additive white Gaussian noise* (**AWGN**)
 # image denoising by Rudin, Osher, and Fatemi. They proposed to estimate the denoised image u as the solution of a minimization problem:
 # 
-# ![](images/Img_01_24.png)
+# ![](images/tv1.png)
 # 
 # where $\lambda$ is a positive parameter, here the first term is for regulariation and the second term represents the data fidelity term, which depends on the noise model. This $\mathbb{l}_2$-$TV$ problem is referred to as the *Rudin-Osher-Fatemi* or *ROF* problem. 
 # 
 # * Denoising is performed as an infinite-dimensional **minimization** problem, where the search space is all bounded variation (BV) images.  ${\textstyle \operatorname {BV} (\Omega )}$ refers the family of functions (with bounded variation) over the domain ${\displaystyle \Omega }$, ${\textstyle \operatorname {TV} (\Omega )}$ is the total variation over the domain, and ${\textstyle \lambda }$ is a penalty term. When ${\textstyle u}$ is *smooth*, the *total variation* is equivalent to the integral of the gradient magnitude:
 # 
-#    ![](images/Img_01_25.png)
+#    ![](images/tv2.png)
 # 
 #   ${\textstyle \|\cdot \|}$ is the Euclidean norm. Then the objective function of the minimization problem becomes:
 # 
-#    ![](images/Img_01_26.png)
+#    ![](images/tv3.png)
 # 
 # * Using the *Euler-Lagrange equation* for *minimization* of the above *functional* [6] results in the following *partial differential equation* (**PDE**):
 # 
 # 
-#    ![](images/Img_01_27.png)
+#    ![](images/tv4.png)
 # 
 # * Here is the time-dependent version of the **ROF** equation:
 # 
-#    ![](images/Img_01_28.png)
-# 
-# * In this problem, we shall denoise an image with `scikit-image`'s implementation of TV denoising, using the algorithm proposed by **Chambolle**, as shown in the following figure. 
-# 
-#    ![](images/Img_01_29.png)
-# 
-# * Total variation denoising tries to minimize the total variation of an image (which is roughly equuivalent to the integral of norm of image gradient) and often produces *cartoon-like* (*piecewise-constant*) images.
-# 
-# * Let's start by importing the required libraries, using the following ode snippet. Notice that the version of the `scikit-image` library must be $\geq 0.14$.
+#    ![](images/tv5.png)
 
 # In[7]:
 
@@ -581,7 +588,7 @@ from skimage.restoration import denoise_tv_chambolle
 # In[ ]:
 
 
-im = 255*rgb2gray(imread('images/Img_01_01.jpg'))
+im = 255*rgb2gray(imread('images/cameraman.jpg'))
 noisy = im + np.random.normal(loc=0, scale=im.std() / 4, size=im.shape)
 
 
@@ -607,7 +614,7 @@ from skimage.restoration import denoise_tv_chambolle, denoise_tv_bregman
 # In[ ]:
 
 
-img = img_as_float(imread('images/Img_01_30.png'))
+img = img_as_float(imread('images/zelda.png'))
 noisy = random_noise(img, var=0.02)
 noisy = np.clip(noisy, 0, 1)
 
@@ -653,7 +660,7 @@ import pywt
 
 
 noise_sigma = 0.1
-im = rgb2gray(imread('images/Img_01_16.jpg'))
+im = rgb2gray(imread('images/a.jpg'))
 noisy = im + np.random.normal(0, noise_sigma, size=im.shape)
 
 
@@ -670,7 +677,7 @@ plt.title('Discrete Wavelet Transform Coefficient for db1 Wavelet for level 3', 
 plt.show()
 
 
-# ![](images/Img_01_38.png)
+# ![](images/thresh.png)
 
 # In[88]:
 
@@ -685,7 +692,7 @@ def denoise(img, wavelet, noise_sigma, mode='soft'):
     out = pywt.waverecn(denoised_coeffs, wavelet)
     return out
 
-im = rgb2gray(imread('images/Img_01_17.jpg'))
+im = rgb2gray(imread('images/beans.jpg'))
 noisy = im + np.random.normal(0, noise_sigma, size=im.shape)
 im_denoised_haar = denoise(noisy, wavelet='haar', noise_sigma=noise_sigma)
 im_denoised_haar_hard = denoise(noisy, wavelet='haar', noise_sigma=noise_sigma, mode='hard')
@@ -705,7 +712,7 @@ from skimage.restoration import (denoise_wavelet, estimate_sigma)
 # In[ ]:
 
 
-original = img_as_float(imread('images/Img_01_18.jpg'))
+original = img_as_float(imread('images/cat.jpg'))
 sigma = 0.12
 noisy = random_noise(original, var=sigma**2)
 sigma_est = estimate_sigma(noisy, average_sigmas=True, multichannel=True)
@@ -728,7 +735,7 @@ for sigma in [sigma_est/2, sigma_est/3, sigma_est/4]:
 # In[81]:
 
 
-img = cv2.imread('images/Img_01_02.jpg')
+img = cv2.imread('images/zelda.jpg')
 noisy = img + cv2.randn(np.copy(img), (0,0,0),(10,10,10))
 
 
@@ -759,7 +766,7 @@ def show_image(img, title=None):
     plt.imshow(nda, cmap='gray'), plt.axis('off')
     if(title): plt.title(title, size=20)
 
-img = sitk.ReadImage('images/Img_01_02.jpg', sitk.sitkUInt8)
+img = sitk.ReadImage('images/zelda.jpg', sitk.sitkUInt8)
 sf = sitk.ShotNoiseImageFilter()
 noisy = sf.Execute(img)
 plt.figure(figsize=(20,17))
@@ -783,7 +790,7 @@ plt.show()
 # In[ ]:
 
 
-img = cv2.imread('images/Img_01_02.jpg')
+img = cv2.imread('images/zelda.jpg')
 noisy = img + cv2.randn(np.copy(img), (0,0,0), (10,10,10))
 
 for d in [9, 15]:
@@ -796,12 +803,6 @@ for d in [9, 15]:
 # ![](images/bilat_out.png)
 
 # ## Problem 9: Denoising with MAP Bayesian with an MRF Prior
-
-# In **Bayesian image denoising** the *optimal noiseless image* is defined as the image that *maximizes* the **posterior pdf**. In this problem we shall implement a *maximum a-posteriori* (**MAP**) *Bayesian denoising algorithm* that uses a noise model coupled with *MRF prior* that uses a $4$-neighborhood system (hence satisfies the **Markov property**, since a pixel is dependent only on its *immediate neighbors*). The following figure shows the theory that will be required to implement the denoising algorithm [22].
-#     
-# ![](images/Img_01_45.png)
-# 
-# * Let's start by importing the required libraries.
 
 # In[2]:
 
@@ -834,7 +835,7 @@ def compute_obj_fun(X,Y,alpha):
 # In[4]:
 
 
-original = cv2.imread('images/Img_01_08.png', 0)
+original = cv2.imread('images/ship.png', 0)
 original = original / original.max()
 noisy = random_noise(original, mode='s&p')
 denoised = np.zeros_like(noisy)
@@ -868,7 +869,7 @@ denoised = res.x.reshape(im_size)
 # 
 # In *kPCA* we choose a ${\displaystyle \Phi }$ function which can be used to (conceptually) map to a very high-dimensional *feature space*, without the need for the data to be actually evaluated in that space. It's done by computing the *kernel* ${\displaystyle K=k(\mathbf {x} ,\mathbf {y} )=(\Phi (\mathbf {x} ),\Phi (\mathbf {y} ))=\Phi (\mathbf {x} )^{T}\Phi (\mathbf {y} )}$, representing the inner product space of the otherwise intractable feature space [21]. Using the *dual form* the *kPCA* never actually computes the *eigenvectors* (the **principal components**) and *eigenvalues* of the *covariance matrix* in the ${\displaystyle \Phi (\mathbf {x} )}$-space, instead it uses the **Kernel trick** to compute the *projections* of the data onto the *principal components*, as shown in the next figure. 
 # 
-# ![](images/Img_01_44.png)
+# ![](images/kpca.png)
 # 
 # * While in *PCA* the number of components is bounded by the number of features, in *kPCA* the *number of components* is bounded by the *number of samples* (since it works in the *dual space*). Many real-world datasets have large number of samples and hence often finding all the components with a full *kPCA* is a waste of computation time, as data is mostly described by the first few components (e.g. `n_components` $\leq 100$). 
 # 
@@ -943,12 +944,12 @@ X_reconstructed_pca = pca.inverse_transform(pca.transform(X_test_noisy))
 #     
 # 2. Rather than using the normal equations to solve inverse problems, numerical analysis suggests that it is preferable to solve the augmented equations, as shown in the following figure, which can be done by a least squares solver (lsqr). Compare the performance to the one you used in problem 0, in terms of number of iterations required to achieve convergence.
 # 
-# ![](images/Img_01_23.png)
+# ![](images/lsaug.png)
 # 
 # 3. Sum of absolute deviations is minimum when it's taken from median: Let's $S=\{X_1,X_2,\ldots,X_n\}$ be a set of numbers s.t., $X_1\leq X_2 \leq \ldots \leq X_n$. Prove that $\sum\limits_{k=1}^{n}|X_k-\theta|$ is minimum when $\theta=median(S)$.
 # 
 # 5. Start with the noisy beans image, Visualize how the DWT coefficients change when thresholded with different threshold values, along with the change in PSNR of the denoised image, with hard / soft threshodling and find the thresholds corresponding to the peak PSNR values, you should get a figure that looks like the one shown below:
-# ![](images/Img_01_19.png)
+# ![](images/beans_dwt.png)
 # 
 # 6. Use Savitzky–Golay filter (`scipy.signal.savgol_filter`) to denoise an image. Play with the window length and the polynomial -degree parameters to understand the impact on smoothing.
 # 
@@ -960,7 +961,7 @@ X_reconstructed_pca = pca.inverse_transform(pca.transform(X_test_noisy))
 # 
 # 10. Use the code for non-local means denoising implementation with `opencv-python` to visualize (in 3D) how the PSNR and the time taken to denoise varies with input parameters $h$ and $searchWindowSize$, you should obtain a figure like the following one.
 # 
-#     ![](images/Img_01_39.png)
+#     ![](images/tuningviz.png)
 #   
 #     Try changing the value of the other parameters too, in roddr to observe the impact on the denoised image quality and the computational efficiency.
 # 

@@ -155,7 +155,7 @@ img_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
-input_img = np.array(Image.open('images/Img_02_24.jpg'))
+input_img = np.array(Image.open('images/bbt.jpg'))
 guide_img = np.array(Image.open('images/cat.jpg'))
 input_tensor = img_transform(input_img).unsqueeze(0)
 guide_tensor = img_transform(guide_img).unsqueeze(0)
@@ -242,7 +242,7 @@ tr_backward = tnt.transform.compose([
         lambda x: x.transpose(1,2,0),
     ])
 
-im = imread('images/Img_02_11.jpg')
+im = imread('images/victoria.jpg')
 
 def plot_image(im, title):
     plt.imshow(im), plt.axis('off')
@@ -271,7 +271,7 @@ plt.show()
 #!pip install onnxruntime
 import onnxruntime
 
-content_image = plt.imread('images/Img_02_04.jpg')
+content_image = plt.imread('images/me.jpg')
 x = cv2.resize(content_image, (224,224))
 x = np.array(x).astype('float32')
 x = np.transpose(x, [2, 0, 1])
@@ -317,7 +317,7 @@ def load_image(image_path, image_size=(256, 256), preserve_aspect_ratio=True):
   img = tf.image.resize(img, image_size, preserve_aspect_ratio=True)
   return img
 
-content_image = load_image('images/Img_02_04.jpg', (512,512))
+content_image = load_image('images/me.jpg', (512,512))
 style_image = load_image('images/bharatmata.png')
 #style_image = tf.nn.avg_pool(style_image, ksize=[3,3], strides=[1,1], padding='SAME')
 
@@ -367,7 +367,7 @@ colorizer = get_image_colorizer(artistic=True)
 
 render_factor = 35  #@param {type: "slider", min: 7, max: 40}
 watermarked = True #@param {type:"boolean"}
-imfile = '../images/Img_02_12.jpg'
+imfile = '../images/butterfly.jpg'
 out_img_deoldify = colorizer.get_transformed_image(imfile, render_factor=render_factor, watermarked=watermarked)
 
 plt.figure(figsize=(15,7))
@@ -641,7 +641,7 @@ from IPython.display import display, Image
 # In[143]:
 
 
-marker, model3d = 'images/book_cover.jpg', 'models/horse.obj' #Img_08_10.jpg
+marker, model3d = 'images/book_cover.jpg', 'models/horse.obj' 
 
 
 # <img src="images/book_cover_model.png" width="500"/>
@@ -820,7 +820,7 @@ from glob import glob
 # In[ ]:
 
 
-image = "images/Img_08_09.png"
+image = "images/screen.png"
 plt.figure(figsize=(10,10))
 plt.imshow(cv2.cvtColor(cv2.imread(image), cv2.COLOR_BGR2RGB)), plt.axis('off')
 plt.title('Original image', size=25)
@@ -1148,7 +1148,7 @@ for x in [248, 229, 190, 159, 128, 97, 84, 62, 40]:
 # 
 # 4. Tune the `render_factor` hyperparameter of the *DeOldify* algorithm (e.g., change from $20$ to $40$) and observe the impact on the color image generated, starting from the following input grayscale image given. 
 # 
-# <img src="images/Img_02_13.jpg" width="300"/>
+# <img src="images/sea.jpg" width="300"/>
 #  
 # You should obtain a figure like the following one, for different values of `render_factor`, in increasing order.
 # 
@@ -1178,6 +1178,37 @@ get_ipython().system('neural-style -style_image starry_night.jpg -content_image 
 # 
 # <img src="images/style_msg_out.png" width="300"/>
 #    Finally, use *MSG-Net* for much faster inference and better quality stylized output image, with multiple style images. 
+# 
+# 6. **Image to Video** with Stable Video Diffusion: Use pretrained stable video diffusion model from **HuggingFace** to create video from an image.
+
+# In[ ]:
+
+
+import torch
+#from diffusers import DiffusionPipeline
+from diffusers.pipelines.pipeline_utils import DiffusionPipeline
+from diffusers.utils import load_image, export_to_video
+
+# Load the pipeline
+pipeline = DiffusionPipeline.from_pretrained(
+    "stabilityai/stable-video-diffusion-img2vid",
+    torch_dtype=torch.float16,
+    variant="fp16"
+).to("cuda")
+
+pipeline.enable_model_cpu_offload()
+
+# Load and preprocess the image
+image = load_image("https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/diffusers/svd/rocket.png")
+image = image.resize((1024, 576))
+
+# Generate video frames
+generator = torch.manual_seed(42)
+frames = pipeline(image, decode_chunk_size=8, generator=generator, num_frames=25).frames[0]
+
+# Export to video
+export_to_video(frames, "generated.mp4", fps=7)
+
 
 # ### References
 # 

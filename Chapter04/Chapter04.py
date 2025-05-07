@@ -105,7 +105,7 @@ plt.show()
 # In[155]:
 
 
-image = imread('images/Img_03_12.png')[...,:3]
+image = imread('images/players.png')[...,:3]
 proc_image = np.reshape(rgb2ycbcr(image), (-1, 3))
 
 fig, sub = plt.subplots(2, 2, figsize=(20,15))
@@ -134,7 +134,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-image = (255*rgb2gray(imread('images/Img_03_13.png')[...,:3])).astype(np.uint8)
+image = (255*rgb2gray(imread('images/land.png')[...,:3])).astype(np.uint8)
 
 thresh = threshold_otsu(image)
 bw = closing(image > thresh, square(3))
@@ -177,7 +177,7 @@ import numpy as np
 import cv2
 import matplotlib.pylab as plt
 
-cap = cv2.VideoCapture('images/Vid_03_01.mp4') 
+cap = cv2.VideoCapture('images/students.mp4') 
 foreground_background = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=32, detectShadows=False)
 
 count = 1
@@ -301,7 +301,7 @@ def run_semantic_segmentation(image, model_path):
     return seg_map
 
 model = 'models/frozen_inference_graph.pb'
-image = 'images/Img_03_16.png'
+image = 'images/road.png'
 image = Image.open(image)
 seg_map = run_semantic_segmentation(image, model)
 visualize_segmentation(image, seg_map)
@@ -341,7 +341,7 @@ for (i, (className, color)) in enumerate(zip(classes, colors)):
 
 net = cv2.dnn.readNet('models/enet-model.net')
 
-image = cv2.imread('images/Img_03_21.jpg')
+image = cv2.imread('images/traffic.jpg')
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 image = imutils.resize(image, width=500)
 blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (1024, 512), 0, swapRB=True, crop=False)
@@ -420,7 +420,7 @@ predictor = DefaultPredictor(cfg)
 # In[ ]:
 
 
-im = cv2.imread('Img_03_16.jpg')
+im = cv2.imread('cats_dogs.jpg')
 
 panoptic_seg, segments_info = predictor(im)["panoptic_seg"]
 v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TRAIN[0]), scale=0.9)
@@ -481,11 +481,11 @@ def get_pred(img, model):
 
 model = load_model()
 
-orig = cv2.cvtColor(cv2.imread('images/Img_03_23.png'), cv2.COLOR_BGR2RGB)
+orig = cv2.cvtColor(cv2.imread('images/me.png'), cv2.COLOR_BGR2RGB)
 frame = orig.copy()
 width, height, channels = frame.shape
 
-bg_image = cv2.imread('images/Img_03_23.jpg')
+bg_image = cv2.imread('images/beach.jpg')
 bg_image = cv2.cvtColor(bg_image, cv2.COLOR_BGR2RGB)
 
 labels = get_pred(frame, model)
@@ -583,11 +583,11 @@ for i in range(k):
 
 # #### Top Outliers detected with the AutoEncoder (with high reconstruction errors)
 # 
-# ![](images/Img_03_27.png)
+# ![](images/outliers.png)
 # 
 # #### Images with less reconstruction error (low outlier scores) with the AutoEncoder
 # 
-# ![](images/Img_03_28.png)
+# ![](images/inliers.png)
 
 # ## Questions
 # 
@@ -677,9 +677,9 @@ def upsampling_block(expansive_input, contractive_input, n_filters=32):
 
 # Use the `CameraRGB` dataset from `lyft-udacity-challenge` (self-driving cars dataset) to train the UNet model (which contains training images along with annotated ground-truth segmentation labels). Finally, use predict to segment the test images. You should obtain better quality segmentation with higher epochs, as shown for a few sample test images.
 # 
-# ![](images/Img_03_24.png)
-# ![](images/Img_03_25.png)
-# ![](images/Img_03_26.png)
+# ![](images/seg1.png)
+# ![](images/seg2.png)
+# ![](images/seg3.png)
 # 
 # 7. Use the `Detectron2` pretrained model to run **instance segmentation** and compare **instance** vs. **panoptic segmentation** using the input image used earlier. You should obtain a figure like the following one.
 # 

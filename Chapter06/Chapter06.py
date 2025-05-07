@@ -36,7 +36,7 @@ print(cv2.__version__)
 
 # grab the paths to the input images and initialize our images list
 print("loading images...")
-images = [cv2.imread(img) for img in glob.glob('images/Imgp_*')]
+images = [cv2.imread(img) for img in glob.glob('images/pan_*')]
 print('Number of images to stitch: {}'.format(len(images)))
 fig = plt.figure(figsize=(20, 15))
 for i in range(len(images)):
@@ -97,24 +97,26 @@ import imageio
 stitcher = cv2.Stitcher_create()
 total = 0
 
-reader1 = imageio.get_reader('images/vid3.mp4')
-reader2 = imageio.get_reader('images/vid4.mp4')
+reader1 = imageio.get_reader('images/vid1.mp4')
+reader2 = imageio.get_reader('images/vid2.mp4')
 fps1 = reader1.get_meta_data()['fps']
 fps2 = reader2.get_meta_data()['fps']
 # print(fps1, fps2)
 # assert(fps1 == fps2)
 
-writer = imageio.get_writer('video_stitched.mp4', fps = fps1)
+writer = imageio.get_writer('images/vid_stitched.mp4', fps = fps1)
 
+# there are total 602 frames in each of the videos, it will take some time to stitch the videos, wait until finished
 for i, (left, right) in enumerate(zip(reader1, reader2)):
+    # print(i)
     # resize the frames
     left = imutils.resize(left, width=400)
     right = imutils.resize(right, width=400)
-    print(left.shape, right.shape)
+    # print(left.shape, right.shape)
 
     # stitch the frames together to form the panorama
     (status, result) = stitcher.stitch([left, right])
-    #print(i, status)
+    # print(i, status)
     
     if status: continue
 
@@ -125,13 +127,13 @@ for i, (left, right) in enumerate(zip(reader1, reader2)):
 
     writer.append_data(cv2.resize(result, (800, 600)))
     
-    plt.figure(figsize=(20,8))
-    plt.subplots_adjust(0,0,1,0.95,0.05,0.05)
-    plt.subplot(131), plt.imshow(left, aspect='auto'), plt.axis('off'), plt.title('Left Frame', size=20) #cv2.cvtColor(left, cv2.COLOR_BGR2RGB)
-    plt.subplot(132), plt.imshow(right, aspect='auto'), plt.axis('off'), plt.title('Right Frame', size=20) #cv2.cvtColor(right, cv2.COLOR_BGR2RGB)
-    plt.subplot(133), plt.imshow(result, aspect='auto'), plt.axis('off'), plt.title('Stitched Frame', size=20) #cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-    plt.savefig('out_{:03d}.png'.format(i))
-    plt.close()
+    #plt.figure(figsize=(20,8))
+    #plt.subplots_adjust(0,0,1,0.95,0.05,0.05)
+    #plt.subplot(131), plt.imshow(left, aspect='auto'), plt.axis('off'), plt.title('Left Frame', size=20) #cv2.cvtColor(left, cv2.COLOR_BGR2RGB)
+    #plt.subplot(132), plt.imshow(right, aspect='auto'), plt.axis('off'), plt.title('Right Frame', size=20) #cv2.cvtColor(right, cv2.COLOR_BGR2RGB)
+    #plt.subplot(133), plt.imshow(result, aspect='auto'), plt.axis('off'), plt.title('Stitched Frame', size=20) #cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
+    #plt.savefig('out_{:03d}.png'.format(i))
+    #plt.close()
     
 writer.close()
 
@@ -329,7 +331,7 @@ plot_gallery(X_test, prediction_titles, h, w)
 
 
 detector = cv2.CascadeClassifier("models/haarcascade_frontalface_default.xml")
-im = cv2.imread('images/Img_07_04.jpg')
+im = cv2.imread('images/leaders.jpg')
 img = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 print(im.shape)
 all_faces = detector.detectMultiScale(img, scaleFactor=1.2, minNeighbors=5)
@@ -401,7 +403,7 @@ def process(img, filters):
         np.maximum(accum, fimg, accum)
     return accum
  
-img_fn = 'images/Img_07_03.jpg'
+img_fn = 'images/lena.jpg'
 img = cv2.imread(img_fn)
 filters = build_filters()
 
@@ -548,7 +550,7 @@ def draw_bounding_boxes(img, found_bounding_boxes, title):
     plt.show()
 
     
-img = cv2.imread("images/Img_04_05.png")
+img = cv2.imread("images/pedestrians.png")
 
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
@@ -585,7 +587,7 @@ draw_bounding_boxes(img, found_bounding_boxes, 'Boundingboxes found by HOG-SVM w
 
 ped_cascade = cv2.CascadeClassifier('models/haarcascade_fullbody.xml')
 
-img = cv2.imread("images/Img_04_05.png")
+img = cv2.imread("images/pedestrians.png")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 peds = ped_cascade.detectMultiScale(gray, 1.01, 3) # scaleFactor=1.2, minNbr=5

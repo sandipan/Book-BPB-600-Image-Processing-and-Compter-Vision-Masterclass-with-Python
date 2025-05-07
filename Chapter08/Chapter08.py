@@ -53,7 +53,7 @@ model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 model.eval()
 
 # Load and preprocess an image
-image_path = 'images/street2.jpeg'  # Replace with your image path
+image_path = 'images/street.jpeg'  # Replace with your image path
 image = Image.open(image_path).convert("RGB")
 image_tensor = F.to_tensor(image)
 
@@ -129,7 +129,7 @@ colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples))
 print("[INFO] loading model...")
 net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
-image = cv2.imread('images/Img_05_08.jpg')
+image = cv2.imread('images/dog_cycle.jpg')
 image = imutils.resize(image, width=400)
 
 # grab the frame dimensions and convert it to a blob
@@ -205,7 +205,7 @@ net = model_zoo.get_model('yolo3_darknet53_voc', pretrained=True)
 # In[5]:
 
 
-x, img = data.transforms.presets.yolo.load_test('images/Img_05_08.jpg', short=512)
+x, img = data.transforms.presets.yolo.load_test('images/dog_cycle.jpg', short=512)
 print('Shape of pre-processed image:', x.shape)
 
 
@@ -251,7 +251,7 @@ train_results = model.train(
 metrics = model.val()
 
 # Perform object detection on an image
-results = model("images/Img_05_08.jpg")
+results = model("images/dog_cycle.jpg")
 results[0].show()
 
 
@@ -595,7 +595,7 @@ def show_image(image, r, class_names, label='all'):
 
 
 # Load a random image from the images folder
-image = skimage.io.imread('images/Img_05_07.jpg')
+image = skimage.io.imread('images/bus.jpg')
 
 # Run detection
 results = model.detect([image], verbose=1)

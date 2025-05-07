@@ -346,7 +346,7 @@ vgg16_model.__call__
 modules = [vgg16, vgg19, inception_v3, resnet50, mobilenet, xception]
 models = [vgg16_model, vgg19_model, inception_model, resnet_model, mobilenet_model, xception_model]
 
-for img in ['Img_05_01.jpg', 'Img_05_02.jpg', 'Img_05_03.jpg', 'Img_05_04.jpg', 'Img_05_05.jpg', 'Img_05_06.jpg']:
+for img in ['clock.jpg', 'bee.jpg', 'peacock.jpg', 'zebra.jpg', 'elephant.jpg', 'broccoli.jpg']:
     
     img = 'images/' + img
     # load an image in PIL format
