@@ -17,34 +17,33 @@
 
 # ## Problem 1: Loading and displaying medical images of different formats and modalities with `pydicom`, `nifti`, `itk` libraries
 
-# In[ ]:
+# In[12]:
 
 
 #! pip install pydicom
 from glob import glob 
 import pydicom 
+import matplotlib.pylab as plt
 
-ct_scan = [pydicom.read_file(dfile) for dfile in sorted(glob('images/MR*.dcm'))]
+ct_scan = [pydicom.read_file(dfile) for dfile in sorted(glob('images/dicom/MR*.dcm'))]
 ct_scan_ordered = sorted(ct_scan, key=lambda slice: slice.SliceLocation) 
+# len(ct_scan_ordered)
+# 32
 
 
-# In[ ]:
+# In[11]:
 
 
-plt.figure(figsize=(12,4))
+plt.figure(figsize=(12,6))
 plt.gray()
 plt.subplots_adjust(0,0,1,0.95,0.01,0.01)
 i = 1
 for dicom_file in ct_scan_ordered:
-  plt.subplot(3,9,i), plt.imshow(dicom_file.pixel_array ), plt.axis('off')
+  plt.subplot(4,8,i), plt.imshow(dicom_file.pixel_array ), plt.axis('off')
   i += 1
 plt.suptitle('Full head MRI scan DICOM files', size=15)
 plt.show()
 
-
-# If you run the above code snippet, you will get a figure like the following one which visualizes the dicom files corresponding to a full head MRI scan.
-# 
-# ![](images/dicom_out.png)
 
 # In[67]:
 
@@ -106,7 +105,7 @@ plt.suptitle('Chest CT-scan mhd (raw) files', size=15)
 plt.show()
 
 
-# ## Problem 2: 3D visualization of a Head MRI image with `matplotlib`, `vtk`, `vedo` and `visvis` 
+# ## Problem 2: 3D visualization of a Head MRI image with `matplotlib`, `vedo` and `visvis` 
 
 # In[ ]:
 
@@ -886,19 +885,18 @@ save_and_display_gradcam(10)
 # 
 # 1. Convert medical images in **DICOM** format to **NIfTI** format (hint: use the library `dicom2nifti`).
 # 
-# 2. Brain Tumor Detection using **transfer learning** with **Mask R-CNN** with Medical Decathlon dataset: Download the dataset `Task01_BrainTumour.tar` from the **Gdrive** from  http://medicaldecathlon.com/. Refer to the problem 11 from the last chapter (chapter 5) (Custom Object Detection and Instance Segmentation with Mask R-CNN). Select (e.g., $2000$ images) randomly from the training dataset along with the labels and create annotation jsons from the labels (e.g., define a function to create annotations and bounding boxes), you should obtain annotated images as shown in the next figure.
+# 2. Use the **visualization toolkit** (the python library `vtk`) to load and render a full-head MRI scan stored in the metaImage (`.mhd`) format. You can follow the steps below:
+#     - Load the 3D `.mhd` file representing a full-head MRI scan using `vtkMetaImageReader`.
+#     - Render the volume using either volume rendering (`vtkGPUVolumeRayCastMapper`) or slicing (`vtkImageReslice` or `vtkImageViewer2`).
+#     - Display the 3D image in an interactive window with appropriate orientation and grayscale mapping.
 # 
-# ![](images/mask_rcnn_tumor_annot.png)
+#     📌 Hints:
+#         - Use `vtkRenderWindowInteractor` for interactivity.
+#         - Apply a `vtkPiecewiseFunction` and `vtkColorTransferFunction` to control opacity and grayscale lookup.
+#     
+#     If you visualize `FullHead.mhd`, you should obtain the following:
 # 
-# Partition the annotated images into two sets: `training` and `validation`. Use the function `load_image_dataset()` to load the train and validation images along with annotations. There should be only $1$ class corresponding to `'Tumor'`, that we want to detect. If you use `display_image_samples()` on an image with annotation you should obtain a figure like the following one:
-# 
-# ![](images/mask_rcnn_samples.png)
-# 
-# Train the model (e.g., for $10$ epochs) on the annotated images, by freezing all the layers except the head layers. After training is over, use the model for inference, to predict the tumor region (along with the bounding box) of a (held-out) `test` image and overlay on top the actual label (use the `color_spalsh()` function), You should obtain a figure like the following, for the given test image:
-# 
-# ![](images/mask_rcnn_tumor_detection.png)
-# 
-# 3. Implement a function to compute the **IOU** (**Intersection over Union (IoU)**) of the model on the test images, from the previous question, to evaluate the model. Remember that the IoU measures the overlap between the predicted bounding box and the ground truth bounding box. It is defined as the area of overlap divided by the area of union between the predicted and ground truth boxes.
+#     ![](images/vtk_out.png)   
 # 
 # ## References
 # 
