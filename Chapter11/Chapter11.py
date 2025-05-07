@@ -27,6 +27,7 @@
 #    10.1 **Zero-shot** Text-to-image generation       
 #    10.2 Editing Image with mask
 
+
 # ## Problem 1: Deep Dreaming with Pytorch
 
 # In[7]:
