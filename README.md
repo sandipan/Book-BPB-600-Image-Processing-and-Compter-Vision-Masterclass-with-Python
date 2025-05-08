@@ -14,7 +14,5 @@
 11.	Miscellaneous Problems in Image Processing and Computer Vision
 
 
-Git repository for the book **Image Processing Mastercalss with Python** 
-
-https://github.com/sandipan/Book-Image-Processing-Masterclass-with-Python
+Git repository for the book **Image Processing Mastercalss with Python**: https://github.com/sandipan/Book-Image-Processing-Masterclass-with-Python
 
